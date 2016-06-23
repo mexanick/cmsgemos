@@ -172,7 +172,7 @@ void gem::readout::GEMReadoutApplication::startAction()
   std::replace(date_and_time.begin(), date_and_time.end(), ' ', '_' );
   std::replace(date_and_time.begin(), date_and_time.end(), ':', '-');
   
-  m_readoutSettings.bag.fileName = toolbox::toString("%s/%s_%s_%s.dat",
+  m_readoutSettings.bag.fileName = toolbox::toString("%s/%s_%s_%s",
                                                      m_readoutSettings.bag.outputLocation.toString().c_str(),
                                                      m_readoutSettings.bag.runType.toString().c_str(),
                                                      m_runNumber.toString().c_str(),
