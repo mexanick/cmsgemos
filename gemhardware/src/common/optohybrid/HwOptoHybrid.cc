@@ -18,7 +18,12 @@ gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid() :
   setDeviceBaseNode("GEM_AMC.OH.OH0");
   //gem::hw::optohybrid::HwOptoHybrid::initDevice();
   //set up which links are active, so that the control can be done without specifying a link
-  INFO("HwOptoHybrid ctor done " << isHwConnected());
+  WARN("HwOptoHybrid, firmware version is " << getFirmwareDate()
+       << std::hex << std::setw(8) << std::setfill('0')
+       << getGEMHwInterface().getNode("GEM_AMC.OH.OH0.STATUS.FW").getAddress() << std::dec
+       << " " << readReg("GEM_AMC.OH.OH0","STATUS.FW"));
+
+  INFO("HwOptoHybrid ctor done, deviceBaseNode is " << getDeviceBaseNode() << " " << isHwConnected());
 }
 
 gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDevice,
@@ -31,7 +36,12 @@ gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDev
   std::stringstream basenode;
   basenode << "GEM_AMC.OH.OH" << *optohybridDevice.rbegin();
   setDeviceBaseNode(basenode.str());
-  INFO("HwOptoHybrid ctor done " << isHwConnected());
+  WARN("HwOptoHybrid, firmware version is " << getFirmwareDate()
+       << std::hex << std::setw(8) << std::setfill('0')
+       << getGEMHwInterface().getNode("GEM_AMC.OH.OH0.STATUS.FW").getAddress() << std::dec
+       << " " << readReg("GEM_AMC.OH.OH0","STATUS.FW"));
+
+  INFO("HwOptoHybrid ctor done, deviceBaseNode is " << getDeviceBaseNode() << " " << isHwConnected());
 }
 
 gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDevice,
@@ -46,7 +56,12 @@ gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDev
   std::stringstream basenode;
   basenode << "GEM_AMC.OH.OH" << *optohybridDevice.rbegin();
   setDeviceBaseNode(basenode.str());
-  INFO("HwOptoHybrid ctor done " << isHwConnected());
+  WARN("HwOptoHybrid, firmware version is " << getFirmwareDate()
+       << std::hex << std::setw(8) << std::setfill('0')
+       << getGEMHwInterface().getNode("GEM_AMC.OH.OH0.STATUS.FW").getAddress() << std::dec
+       << " " << readReg("GEM_AMC.OH.OH0","STATUS.FW"));
+
+  INFO("HwOptoHybrid ctor done, deviceBaseNode is " << getDeviceBaseNode() << " " << isHwConnected());
 }
 
 gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDevice,
@@ -59,7 +74,12 @@ gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(std::string const& optohybridDev
   std::stringstream basenode;
   basenode << "GEM_AMC.OH.OH" << *optohybridDevice.rbegin();
   setDeviceBaseNode(basenode.str());
-  INFO("HwOptoHybrid ctor done " << isHwConnected());
+  WARN("HwOptoHybrid, firmware version is " << getFirmwareDate()
+       << std::hex << std::setw(8) << std::setfill('0')
+       << getGEMHwInterface().getNode("GEM_AMC.OH.OH0.STATUS.FW").getAddress() << std::dec
+       << " " << readReg("GEM_AMC.OH.OH0","STATUS.FW"));
+  
+  INFO("HwOptoHybrid ctor done, deviceBaseNode is " << getDeviceBaseNode() << " " << isHwConnected());
 }
 /*
 gem::hw::optohybrid::HwOptoHybrid::HwOptoHybrid(gem::hw::glib::HwGLIB const& glib,
@@ -154,13 +174,14 @@ bool gem::hw::optohybrid::HwOptoHybrid::isHwConnected()
       return true;
     } else {
       b_is_connected = false;
-      DEBUG("OptoHybrid not reachable (unable to find 15 or 16 in the firmware string)."
+      WARN("OptoHybrid not reachable (unable to find 15 or 16 in the firmware string: "
+            << this->getFirmwareDate() << ")."
             << " Obviously we need a better strategy to check connectivity");
       return false;
     }
   }
   //shouldn't get to here unless HW isn't connected
-  DEBUG("OptoHybrid not reachable (!b_is_connected && !GEMHwDevice::isHwConnnected)");
+  WARN("OptoHybrid not reachable (!b_is_connected && !GEMHwDevice::isHwConnnected)");
   return false;
 }
 
@@ -366,29 +387,38 @@ std::vector<std::pair<uint8_t,uint32_t> > gem::hw::optohybrid::HwOptoHybrid::get
 
 uint32_t gem::hw::optohybrid::HwOptoHybrid::getConnectedVFATMask()
 {
-  std::vector<uint32_t> allChips = broadcastRead("ChipID0",0xff000000);
+  std::vector<uint32_t> allChips = broadcastRead("ChipID0",ALL_VFATS_BCAST_MASK);
   uint32_t connectedMask = 0x0; // high means don't broadcast
   uint32_t disabledMask  = 0x0; // high means ignore data
-  DEBUG("Reading ChipID0 from all possible slots");
+  WARN("HwOptoHybrid::getConnectedVFATMask Reading ChipID0 from all possible slots");
   for (auto id = allChips.begin(); id != allChips.end(); ++id) {
     // 0x00XXYYZZ
     // XX = status (00000EVR)
     // YY = chip number
     // ZZ = register contents
-    DEBUG("result 0x" << std::setw(8) << std::setfill('0') << std::hex << *id << std::dec);
+    WARN("HwOptoHybrid::getConnectedVFATMask result 0x" << std::setw(8) << std::setfill('0') << std::hex << *id << std::dec);
     bool e_bit(((*id)>>18)&0x1),v_bit(((*id)>>17)&0x1),r_bit(((*id)>>16)&0x1);
 
-    if (v_bit && !e_bit) {
+    // if (v_bit && !e_bit) {
+    if (((*id) >> 16) != 0x3) {
       uint8_t shift = ((*id)>>8)&0xff;
       connectedMask |= (0x1 << shift);
       disabledMask  |= (0x1 << shift);
     }
-    DEBUG("mask is " << std::hex << connectedMask << std::dec);
+    WARN("HwOptoHybrid::getConnectedVFATMask mask is " << std::hex << connectedMask << std::dec);
   }
 
+  DEBUG("HwOptoHybrid::getConnectedVFATMask previous mask is 0x" << std::setw(8) << std::setfill('0')
+        << std::hex << connectedMask << std::dec);
   connectedMask = ~connectedMask;
   disabledMask  = ~disabledMask ;
-  DEBUG("final mask is 0x" << std::setw(8) << std::setfill('0') << std::hex << connectedMask << std::dec);
+  DEBUG("HwOptoHybrid::getConnectedVFATMask intermediate mask is 0x" << std::setw(8) << std::setfill('0')
+        << std::hex << connectedMask << std::dec);
+  connectedMask |= ALL_VFATS_BCAST_MASK;
+  disabledMask  |= ALL_VFATS_BCAST_MASK;
+  DEBUG("HwOptoHybrid::getConnectedVFATMask final mask is 0x" << std::setw(8) << std::setfill('0')
+        << std::hex << connectedMask << std::dec);
+
   return connectedMask;
 }
 
@@ -398,16 +428,25 @@ void gem::hw::optohybrid::HwOptoHybrid::setVFATsToDefaults(uint8_t  const& vt1,
                                                            uint8_t  const& latency,
                                                            uint32_t const& broadcastMask)
 {
+  // std::stringstream regName;
+  // regName << getDeviceBaseNode() << ".GEB.Broadcast.Results";
+  // std::vector<uint32_t> res;
+  // res = readBlock(regName.str(),std::bitset<32>(~broadcastMask).count());
+  // WARN("HwOptoHybrid::setVFATsToDefaults::Latency");
+  // for (auto r = res.begin(); r != res.end(); ++r) {
+  //   WARN(" 0x" << std::hex << std::setw(8) << std::setfill('0') << *r << std::dec);
+  // }
+
   broadcastWrite("ContReg0",   0x36, broadcastMask);
   broadcastWrite("ContReg1",   0x00, broadcastMask);
   broadcastWrite("ContReg2",   0x30, broadcastMask);
   broadcastWrite("ContReg3",   0x00, broadcastMask);
   broadcastWrite("IPreampIn",   168, broadcastMask);
-  broadcastWrite("IPreampFeed", 150, broadcastMask);
-  broadcastWrite("IPreampOut",   80, broadcastMask);
+  broadcastWrite("IPreampFeed",  80, broadcastMask);
+  broadcastWrite("IPreampOut",  150, broadcastMask);
   broadcastWrite("IShaper",     150, broadcastMask);
   broadcastWrite("IShaperFeed", 100, broadcastMask);
-  broadcastWrite("IComp",       120, broadcastMask);
+  broadcastWrite("IComp",        90, broadcastMask);
 
   broadcastWrite("VThreshold1", vt1,     broadcastMask);
   broadcastWrite("VThreshold2", vt2,     broadcastMask);

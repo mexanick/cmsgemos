@@ -14,7 +14,7 @@ gem::hw::glib::HwGLIB::HwGLIB() :
   setDeviceBaseNode("GEM_AMC");
   setExpectedBoardID("GLIB");
 
-  INFO("HwGLIB ctor done " << isHwConnected());
+  INFO("HwGLIB ctor done, deviceBaseNode is " << getDeviceBaseNode());
 }
 
 gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
@@ -26,7 +26,7 @@ gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
   setDeviceBaseNode("GEM_AMC");
   setExpectedBoardID("GLIB");
 
-  INFO("HwGLIB ctor done " << isHwConnected());
+  INFO("HwGLIB ctor done, deviceBaseNode is " << getDeviceBaseNode());
 }
 
 gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
@@ -40,7 +40,7 @@ gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
   setDeviceBaseNode("GEM_AMC");
   setExpectedBoardID("GLIB");
 
-  INFO("HwGLIB ctor done " << isHwConnected());
+  INFO("HwGLIB ctor done, deviceBaseNode is " << getDeviceBaseNode());
 }
 
 gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
@@ -52,7 +52,7 @@ gem::hw::glib::HwGLIB::HwGLIB(std::string const& glibDevice,
   setDeviceBaseNode("GEM_AMC");
   setExpectedBoardID("GLIB");
 
-  INFO("HwGLIB ctor done " << isHwConnected());
+  INFO("HwGLIB ctor done, deviceBaseNode is " << getDeviceBaseNode());
 }
 
 gem::hw::glib::HwGLIB::HwGLIB(const int& crate, const int& slot) :
@@ -82,7 +82,7 @@ gem::hw::glib::HwGLIB::HwGLIB(const int& crate, const int& slot) :
     m_ipBusCounters.push_back(tmpGTXCounter);
   }
 
-  INFO("HwGLIB ctor done " << isHwConnected());
+  INFO("HwGLIB ctor done, deviceBaseNode is " << getDeviceBaseNode());
 }
 
 gem::hw::glib::HwGLIB::~HwGLIB()

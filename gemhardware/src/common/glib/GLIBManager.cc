@@ -285,7 +285,8 @@ void gem::hw::glib::GLIBManager::initializeAction()
       DEBUG("GLIBManager::connected a card in slot " << (slot+1));
     } else {
       ERROR("GLIBManager::GLIB in slot " << (slot+1) << " is not connected");
-      fireEvent("Fail");
+      //fireEvent("Fail");
+      XCEPT_RAISE(gem::hw::glib::exception::Exception, "initializeAction failed");
       // maybe raise exception so as to not continue with other cards? let's just return for the moment
       return;
     }
@@ -310,6 +311,9 @@ void gem::hw::glib::GLIBManager::configureAction()
       m_glibs.at(slot)->resetL1ACount();
       m_glibs.at(slot)->resetCalPulseCount();
 
+      // reset the TTC
+      m_glibs.at(slot)->ttcReset();
+      
       // reset the DAQ
       m_glibs.at(slot)->setL1AEnable(0x0);
       m_glibs.at(slot)->resetDAQLink();
@@ -329,7 +333,8 @@ void gem::hw::glib::GLIBManager::configureAction()
       // setup DAQ mode?
     } else {
       ERROR("GLIBManager::GLIB in slot " << (slot+1) << " is not connected");
-      fireEvent("Fail");
+      //fireEvent("Fail");
+      XCEPT_RAISE(gem::hw::glib::exception::Exception, "configureAction failed");
       // maybe raise exception so as to not continue with other cards?
     }
   }
@@ -359,7 +364,8 @@ void gem::hw::glib::GLIBManager::startAction()
       usleep(100); // just for testing the timing of different applications
     } else {
       ERROR("GLIB in slot " << (slot+1) << " is not connected");
-      fireEvent("Fail");
+      //fireEvent("Fail");
+      XCEPT_RAISE(gem::hw::glib::exception::Exception, "startAction failed");
       // maybe raise exception so as to not continue with other cards? let's just return for the moment
       return;
     }
@@ -528,27 +534,16 @@ void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib
   is_glib->createUInt32("RUN_TYPE",          glib->getDAQLinkL1AID(),                 NULL, GEMUpdateType::HW32);
   is_glib->createUInt32("RUN_PARAMS",        glib->getDAQLinkL1AID(),                 NULL, GEMUpdateType::HW32);
 
-  is_glib->createUInt32("OH0_STATUS",               glib->getDAQLinkStatus(0),      NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH0_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(0, 0), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH0_EVN",                  glib->getDAQLinkCounters(0, 1), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH0_EOE_TIMEOUT",          glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH0_MAX_EOE_TIMER",        glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH0_LAST_EOE_TIMER",       glib->getDAQLinkDAVTimer(1),    NULL, GEMUpdateType::HW32);
-
-  is_glib->createUInt32("OH1_STATUS",               glib->getDAQLinkStatus(1),      NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH1_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(1, 0), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH1_EVN",                  glib->getDAQLinkCounters(1, 1), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH1_EOE_TIMEOUT",          glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH1_MAX_EOE_TIMER",        glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH1_LAST_EOE_TIMER",       glib->getDAQLinkDAVTimer(1),    NULL, GEMUpdateType::HW32);
-
-  is_glib->createUInt32("OH2_STATUS",               glib->getDAQLinkStatus(2),      NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH2_CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(2, 0), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH2_EVN",                  glib->getDAQLinkCounters(2, 1), NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH2_EOE_TIMEOUT",          glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH2_MAX_EOE_TIMER",        glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
-  is_glib->createUInt32("OH2_LAST_EOE_TIMER",       glib->getDAQLinkDAVTimer(2),    NULL, GEMUpdateType::HW32);
-
+  for (int ohlink = 0; ohlink < glib->getSupportedOptoHybrids(); ++ohlink) {
+    std::stringstream ss;
+    ss << "OH" << ohlink;
+    is_glib->createUInt32(ss.str() + "STATUS",               glib->getDAQLinkStatus(1),      NULL, GEMUpdateType::HW32);
+    is_glib->createUInt32(ss.str() + "CORRUPT_VFAT_BLK_CNT", glib->getDAQLinkCounters(1, 0), NULL, GEMUpdateType::HW32);
+    is_glib->createUInt32(ss.str() + "EVN",                  glib->getDAQLinkCounters(1, 1), NULL, GEMUpdateType::HW32);
+    is_glib->createUInt32(ss.str() + "EOE_TIMEOUT",          glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
+    is_glib->createUInt32(ss.str() + "MAX_EOE_TIMER",        glib->getDAQLinkDAVTimer(0),    NULL, GEMUpdateType::HW32);
+    is_glib->createUInt32(ss.str() + "LAST_EOE_TIMER",       glib->getDAQLinkDAVTimer(1),    NULL, GEMUpdateType::HW32);
+  }
   /* not yet implemented
   // request counters
   is_glib->createUInt64("OptoHybrid_0", 0, NULL, GEMUpdateType::I2CSTAT, "docstring", "i2c/hex");
@@ -570,7 +565,7 @@ void gem::hw::glib::GLIBManager::createGLIBInfoSpaceItems(is_toolbox_ptr is_glib
   is_glib->createUInt32("TTC_SPY",     glib->getTTCSpyBuffer(), NULL, GEMUpdateType::HW32);
 
   // TRIGGER registers
-  for (int oh = 0; oh < 4; ++oh) {
+  for (int oh = 0; oh < glib->getSupportedOptoHybrids(); ++oh) {
     std::stringstream ohname;
     ohname << "OH" << oh;
     for (int cluster = 0; cluster < 8; ++cluster) {
