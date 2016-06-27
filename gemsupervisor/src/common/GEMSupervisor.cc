@@ -172,6 +172,7 @@ void gem::supervisor::GEMSupervisor::initializeAction()
     INFO(std::string("Initializing ")+(*i)->getClassName());
     gem::utils::soap::GEMSOAPToolBox::sendCommand("Initialize", p_appContext, p_appDescriptor, *i);
   }
+  m_globalState.update();
 }
 
 void gem::supervisor::GEMSupervisor::configureAction()
@@ -370,18 +371,21 @@ void gem::supervisor::GEMSupervisor::updateRunNumber()
     + limit;
   */
 
+  // // book the next run number
+  // std::string sqlInsert = "INSERT INTO runnumbertbl (USERNAME,SEQUENCENAME,SEQUENCENUMBER) VALUES (?,?,?)";
+
   /*ldqm_db example
     | id  | Name                             | Type  | Number | Date       | Period | Station | Status | State_id |
     +-----+----------------------------------+-------+--------+------------+--------+---------+--------+----------+
     |   4 | run000001_bench_TAMU_2015-12-15  | bench | 000001 | 2015-12-16 | 2015T  | TAMU    |      1 |     NULL |
   */
-  
+
   if (p_gemDBHelper->connect("ldqm_db")) {
     // get these from or send them to the readout application
     std::string    setup = "teststand";
     std::string   period = "2016T";
     std::string location = "CERN904";
-  
+
     std::string lastRunNumberQuery = "SELECT Number FROM ldqm_db_run WHERE Station LIKE '";
     lastRunNumberQuery += location;
     lastRunNumberQuery += "' ORDER BY id DESC LIMIT 1;";
@@ -392,7 +396,7 @@ void gem::supervisor::GEMSupervisor::updateRunNumber()
       WARN("GEMSupervisor::updateRunNumber caught gem::utils::DBEmptyQueryResult " << e.what());
       // m_runNumber.value_ = 0;
     } catch (xcept::Exception& e) {
-      ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());      
+      ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     } catch (std::exception& e) {
       ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     }
@@ -431,7 +435,7 @@ void gem::supervisor::GEMSupervisor::updateRunNumber()
     } catch (gem::utils::exception::Exception& e) {
       WARN("GEMSupervisor::updateRunNumber caught gem::utils::exception::Exception " << e.what());
     } catch (xcept::Exception& e) {
-      ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());      
+      ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     } catch (std::exception& e) {
       ERROR("GEMSupervisor::updateRunNumber caught std::exception " << e.what());
     }
