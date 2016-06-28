@@ -27,6 +27,13 @@ class AMCmanager:
     writeRegister(self.glib,"GLIB.DAQ.CONTROL.DAQ_LINK_RESET",0x0)
     writeRegister(self.glib,"GLIB.DAQ.CONTROL", 0x8)
 
+  def checkGTX(self,link):
+    fwv = readRegister(self.glib,"GLIB.OptoHybrid_%d.OptoHybrid.STATUS.FW"%(link))
+    if fwv != 0x0:
+      return True
+    else:
+      return False
+
   def activateGTX(self):
     c = 0
     for l in (0,1):#(0,1): currently hack to have only single OH connected twice
