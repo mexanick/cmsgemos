@@ -188,7 +188,6 @@ void gem::hw::glib::GLIBManager::initializeAction()
     if (!info.present)
       continue;
 
-    DEBUG("GLIBManager::info:" << info.toString());
     DEBUG("GLIBManager::creating pointer to card in slot " << (slot+1));
 
     // create the cfgInfoSpace object (qualified vs non?)
@@ -273,6 +272,8 @@ void gem::hw::glib::GLIBManager::initializeAction()
     // set the web view to be empty or grey
     // if (!info.present.value_) continue;
     // p_gemWebInterface->glibInSlot(slot);
+    // FOR MISHA
+    // hardware should be connected, can update ldqm_db for teststand/local runs
   }
 
   for (unsigned slot = 0; slot < MAX_AMCS_PER_CRATE; ++slot) {
@@ -313,7 +314,7 @@ void gem::hw::glib::GLIBManager::configureAction()
 
       // reset the TTC
       m_glibs.at(slot)->ttcReset();
-      
+
       // reset the DAQ
       m_glibs.at(slot)->setL1AEnable(0x0);
       m_glibs.at(slot)->resetDAQLink();
