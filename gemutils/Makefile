@@ -35,7 +35,7 @@ UserCCFlags +=$(MySQLCFLAGS)
 
 LibraryDirs+=$(MySQLLIBS)
 LibraryDirs+=$(MySQLGLIBS)
-LibraryDirs+=/usr/lib/pytgon2.6
+
 
 UserDynamicLinkFlags+=$(MySQLLIBS)
 
