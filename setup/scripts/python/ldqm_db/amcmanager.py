@@ -29,7 +29,9 @@ class AMCmanager:
 
   def checkGTX(self,link):
     fwv = readRegister(self.glib,"GLIB.OptoHybrid_%d.OptoHybrid.STATUS.FW"%(link))
-    if fwv != 0x0:
+    t_fwv = str(hex(fwv))
+    print "Firmware version link %d: %s, %s \n" %(link, t_fwv, int(str(fwv)))
+    if (("15" in t_fwv) or ("16" in t_fwv)):
       return True
     else:
       return False

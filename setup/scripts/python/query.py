@@ -8,8 +8,10 @@ from ldqm_db.models import *
 from ldqm_db.amcmanager import *
 
 def configure_db():
-    amc_list=[1,2,3,4,5,6,7,8,9,10,11,12]
-    geb_list=[[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],]
+    #amc_list=[1,2,3,4,5,6,7,8,9,10,11,12]
+    amc_list=[9,]
+    #geb_list=[[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],]
+    geb_list=[[1],]
     zlist = zip(amc_list, geb_list)
     for amcN, gtx_list in zlist:
       print "Trying to connect to AMC # %s\n" %(amcN)

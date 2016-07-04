@@ -115,6 +115,7 @@ if (options.daq_enable>=0):
         writeRegister(glib, "GLIB.DAQ.CONTROL.INPUT_ENABLE_MASK", 0x1)
         writeRegister(glib, "GLIB.DAQ.CONTROL.DAV_TIMEOUT",       0x30D40)
         writeRegister(glib, "GLIB.DAQ.EXT_CONTROL.INPUT_TIMEOUT", 0x30D4)
+        writeRegister(glib, "GLIB.DAQ.CONTROL", 0x381)# enable both GTX links
         for olink in range(NGTX):
                 # in 160MHz clock cycles, so multiply by 4 to get in terms of BX
                 # 0xc35 -> 781 BX
