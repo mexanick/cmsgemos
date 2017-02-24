@@ -57,7 +57,7 @@ from gemlogger import GEMLogger
 gemlogger = GEMLogger("glib_board_info_uhal").gemlogger
 gemlogger.setLevel(GEMLogger.INFO)
 
-connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections_ch.xml"
+connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
 manager         = uhal.ConnectionManager(connection_file )
 
 amc  = manager.getDevice( "gem.shelf%02d.amc%02d"%(options.shelf,options.slot) )

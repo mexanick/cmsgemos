@@ -22,13 +22,13 @@
   <connection id="gem.shelf01.amc02.optohybrid01" uri="chtcp-2.0://bridge-s2e01-23:10203?target=amc-s2e01-23-02:50001"
 	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_glib.xml" />
 
-  <connection id="gem.shelf01.amc03" uri="chtcp-2.0://bridge-s2e01-23:10203?target=amc-s2e01-23-03:50001"
-	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_glib.xml" />
+  <connection id="gem.shelf01.amc03" uri="ipbustcp-2.0://amc-s2e01-23-03:60002"
+	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_ctp7.xml" />
   <!-- now address tables have to be aware of  which optohybrid is where, link related, so should be programmable-->
-  <connection id="gem.shelf01.amc03.optohybrid00" uri="chtcp-2.0://bridge-s2e01-23:10203?target=amc-s2e01-23-03:50001"
-	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_glib.xml" />
-  <connection id="gem.shelf01.amc03.optohybrid01" uri="chtcp-2.0://bridge-s2e01-23:10203?target=amc-s2e01-23-03:50001"
-	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_glib.xml" />
+  <connection id="gem.shelf01.amc03.optohybrid00" uri="ipbustcp-2.0://amc-s2e01-23-03:60002"
+	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_ctp7.xml" />
+  <connection id="gem.shelf01.amc03.optohybrid01" uri="ipbustcp-2.0://amc-s2e01-23-03:60002"
+	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_ctp7.xml" />
 
   <connection id="gem.shelf01.amc04" uri="chtcp-2.0://bridge-s2e01-23:10203?target=amc-s2e01-23-04:50001"
 	      address_table="file://${GEM_ADDRESS_TABLE_PATH}/uhal_gem_amc_glib.xml" />

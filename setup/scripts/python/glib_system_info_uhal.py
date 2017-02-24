@@ -16,6 +16,7 @@ def getBoardID(glib,debug=False):
                         chr(brd_result[reg_list[1]]),
                         chr(brd_result[reg_list[2]]),
                         chr(brd_result[reg_list[3]])])
+    #board_id = readRegister(glib,"GEM_AMC.GEM_SYSTEM.BOARD_ID")
     return board_id
 
 def getSystemID(glib,debug=False):
