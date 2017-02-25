@@ -7,7 +7,8 @@ sys.path.append('${GEM_PYTHON_PATH}')
 
 NGTX = 2
 
-import uhal
+#import uhal
+from rw_reg import rpc_connect
 from registers_uhal import *
 from glib_system_info_uhal import *
 from rate_calculator import rateConverter,errorRate
@@ -52,15 +53,18 @@ parser.add_option("--shelf", type="int", dest="shelf",default=1,
 
 (options, args) = parser.parse_args()
 
-uhal.setLogLevelTo( uhal.LogLevel.FATAL )
+#uhal.setLogLevelTo( uhal.LogLevel.FATAL )
 from gemlogger import GEMLogger
 gemlogger = GEMLogger("glib_board_info_uhal").gemlogger
 gemlogger.setLevel(GEMLogger.INFO)
 
-connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
-manager         = uhal.ConnectionManager(connection_file )
+#connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
+#manager         = uhal.ConnectionManager(connection_file )
+#
+#amc  = manager.getDevice( "gem.shelf%02d.amc%02d"%(options.shelf,options.slot) )
 
-amc  = manager.getDevice( "gem.shelf%02d.amc%02d"%(options.shelf,options.slot) )
+amc = rpc_connect("eagle33")
+parseXML()
 
 ########################################
 # IP address
@@ -186,9 +190,9 @@ for olink in range(NGTX):
     print "-------------------------================--"
     print "-------------> DEBUG INFO <----------------"
     print "-------------------------================--"
-    dbgWords = readBlock(amc,"GEM_AMC.DAQ.OH%d.LASTBLOCK"%(olink),7)
-    for word in dbgWords:
-        print "-> DAQ OH%d debug:0x%08x"%(olink,word)
+    #dbgWords = readBlock(amc,"GEM_AMC.DAQ.OH%d.LASTBLOCK"%(olink),7)
+    #for word in dbgWords:
+    #    print "-> DAQ OH%d debug:0x%08x"%(olink,word)
 
 print
 print "--=======================================--"

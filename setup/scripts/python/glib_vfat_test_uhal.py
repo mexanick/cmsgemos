@@ -4,7 +4,8 @@ import sys, re, time, datetime, os
 
 sys.path.append('${GEM_PYTHON_PATH}')
 
-import uhal
+#import uhal
+from rw_reg import rpc_connect
 from registers_uhal import *
 from glib_system_info_uhal import *
 from vfat_functions_uhal import *
@@ -41,7 +42,7 @@ if options.enabledChips:
     msg = "chips", chips
     gemlogger.info(msg)
     pass
-uhal.setLogLevelTo( uhal.LogLevel.FATAL )
+#uhal.setLogLevelTo( uhal.LogLevel.FATAL )
 
 uTCAslot = 10
 if options.slot:
@@ -50,10 +51,12 @@ if options.slot:
 msg = options.slot, uTCAslot
 gemlogger.debug(msg)
 
-connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
-manager         = uhal.ConnectionManager(connection_file )
-
-amc  = manager.getDevice( "gem.shelf%02d.amc%02d"%(options.shelf,options.slot) )
+#connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
+#manager         = uhal.ConnectionManager(connection_file )
+#
+#amc  = manager.getDevice( "gem.shelf%02d.amc%02d"%(options.shelf,options.slot) )
+amc = rpc_connect("eagle33")
+parseXML()
 
 ########################################
 # IP address
@@ -66,34 +69,34 @@ if options.debug:
     getSystemInfo(amc)
     msg = "The nodes within GEM_AMC are:"
     gemlogger.debug(msg)
-    for inode in amc.getNode("GEM_AMC").getNodes():
-        msg = inode, "attributes ..."
-        gemlogger.debug(msg)
-        node = amc.getNode("GEM_AMC."+inode)
-        msg = "Address:0x%08x"%(node.getAddress())
-        gemlogger.debug(msg)
-        # Bit-mask of node
-        msg = "Mask:   0x%08x"%(node.getMask())
-        gemlogger.debug(msg)
-        # Mode enum - one of uhal.BlockReadWriteMode.SINGLE (default), INCREMENTAL and NON_INCREMENTAL,
-        #  or HIERARCHICAL for top-level nodes nesting other nodes.
-        msg = "Mode:", node.getMode()
-        gemlogger.debug(msg)
-        # One of uhal.NodePermission.READ, WRITE and READWRITE
-        msg = "R/W:", node.getPermission()
-        gemlogger.debug(msg)
-        # In units of 32-bits. All single registers and FIFOs have default size of 1
-        msg = "Size (in units of 32-bits):", node.getSize()
-        gemlogger.debug(msg)
-        # User-definable string from address table - in principle a comma separated list of values
-        #msg = "Tags:", node.getTags()
-        #gemlogger.debug(msg)
-        ## Map of user-definable, semicolon-delimited parameter=value pairs specified in the "parameters"
-        ##  xml address file attribute.
-        #msg = "Parameters:", node.getParameters()
-        #gemlogger.debug(msg)
-        pass
-    pass
+    #for inode in amc.getNode("GEM_AMC").getNodes():
+    #    msg = inode, "attributes ..."
+    #    gemlogger.debug(msg)
+    #    node = amc.getNode("GEM_AMC."+inode)
+    #    msg = "Address:0x%08x"%(node.getAddress())
+    #    gemlogger.debug(msg)
+    #    # Bit-mask of node
+    #    msg = "Mask:   0x%08x"%(node.getMask())
+    #    gemlogger.debug(msg)
+    #    # Mode enum - one of uhal.BlockReadWriteMode.SINGLE (default), INCREMENTAL and NON_INCREMENTAL,
+    #    #  or HIERARCHICAL for top-level nodes nesting other nodes.
+    #    msg = "Mode:", node.getMode()
+    #    gemlogger.debug(msg)
+    #    # One of uhal.NodePermission.READ, WRITE and READWRITE
+    #    msg = "R/W:", node.getPermission()
+    #    gemlogger.debug(msg)
+    #    # In units of 32-bits. All single registers and FIFOs have default size of 1
+    #    msg = "Size (in units of 32-bits):", node.getSize()
+    #    gemlogger.debug(msg)
+    #    # User-definable string from address table - in principle a comma separated list of values
+    #    #msg = "Tags:", node.getTags()
+    #    #gemlogger.debug(msg)
+    #    ## Map of user-definable, semicolon-delimited parameter=value pairs specified in the "parameters"
+    #    ##  xml address file attribute.
+    #    #msg = "Parameters:", node.getParameters()
+    #    #gemlogger.debug(msg)
+    #    pass
+    #pass
 
 print
 print "--=======================================--"

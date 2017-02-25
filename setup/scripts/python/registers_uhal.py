@@ -2,7 +2,7 @@ import sys, os, time, signal, random
 sys.path.append('${GEM_PYTHON_PATH}')
 sys.path.append('${XHAL_PYTHON_PATH}')
 
-from rw_reg.py import *
+from rw_reg import *
 
 from gemlogger import GEMLogger
 gemlogger = GEMLogger("registers_uhal").gemlogger
@@ -33,14 +33,16 @@ def readRegister(device, register, debug=False):
         print colors.MAGENTA,"NODE NOT FOUND",colors.ENDC
         return 0x0
     if debug:
-        print """Trying to read register %s (%s)\n
-              address 0x%08x  mask 0x%08x  permission %s  \n
-              """%(register,
-                 m_node.name,
-                 m_node.real_address,
-                 m_node.mask,
-                 m_node.permission
-                 )
+        print "Trying to read\n"
+        print m_node.output()
+        #print """Trying to read register %s (%s)\n
+        #      address 0x%08x  mask 0x%08x  permission %s  \n
+        #      """%(register,
+        #         m_node.name,
+        #         m_node.real_address,
+        #         m_node.mask,
+        #         m_node.permission
+        #         )
         pass
     while (nRetries < gMAX_RETRIES):
 	reg_val_s = readReg(m_node)
@@ -77,19 +79,21 @@ def readBlock(device, register, nwords, debug=False):
     nRetries = 0
     m_node = getNode(register)
     if m_node is None:
-        print colors.MAGENTA,"NODE NOT FOUND",colors.ENDC
+        print colors.MAGENTA,"NODE %s NOT FOUND" %(register),colors.ENDC
         return 0x0
 
     if debug:
-        print """Trying to read register %s (%s)\n
-              address 0x%08x  mask 0x%08x  permission %s  \n
-              """%(register,
-                 m_node.name,
-                 m_node.real_address,
-                 m_node.mask,
-                 m_node.permission
-                 )
-        pass
+        print "Trying to read\n"
+        print m_node.output()
+        #print """Trying to read register %s (%s)\n
+        #      address 0x%08x  mask 0x%08x  permission %s  \n
+        #      """%(register,
+        #         m_node.name,
+        #         m_node.real_address,
+        #         m_node.mask,
+        #         m_node.permission
+        #         )
+        #pass
  
     words = []
     while (nRetries < gMAX_RETRIES):
@@ -124,14 +128,16 @@ def writeRegister(device, register, value, debug=False):
         return 0x0
 
     if debug:
-        print """Trying to read register %s (%s)\n
-              address 0x%08x  mask 0x%08x  permission %s  \n
-              """%(register,
-                 m_node.name,
-                 m_node.real_address,
-                 m_node.mask,
-                 m_node.permission
-                 )
+        print "Trying to read\n"
+        print m_node.output()
+        #print """Trying to read register %s (%s)\n
+        #      address 0x%08x  mask 0x%08x  permission %s  \n
+        #      """%(register,
+        #         m_node.name,
+        #         m_node.real_address,
+        #         m_node.mask,
+        #         m_node.permission
+        #         )
         pass
  
     while (nRetries < gMAX_RETRIES):
