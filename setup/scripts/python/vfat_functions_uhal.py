@@ -196,7 +196,7 @@ def biasAllVFATs(device, gtx, mask=0x0, enable=True, debug=False):
         #writeRegister(device,"%s.VFATChannels.ChanReg%d"%(baseNode,chan+1),0x40)
         #mask no channels, as this seems to affect the output data packets, not just the triggers
         # disable cal pulses to all channels
-        writeAllVFATs(device, gtx, "VFATChannels.ChanReg%d"%(chan+1),0x00, mask=mask,debug=debug)
+        writeAllVFATs(device, gtx, "VFATChannels.ChanReg%d"%(chan),0x00, mask=mask,debug=debug)
     return
 
 def getChipID(device, gtx, chip, debug=False):

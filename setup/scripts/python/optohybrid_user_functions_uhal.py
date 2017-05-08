@@ -243,7 +243,7 @@ def startLocalT1(device,gtx,debug=False):
 
 def stopLocalT1(device,gtx,debug=False):
     if readRegister(device,"GEM_AMC.OH.OH%d.T1Controller.MONITOR"%(gtx)):
-        writeRegister(device,"GEM_AMC.OH.OH%d.T1Controller.TOGGLE"%(gtx),0x1)
+        writeRegister(device,"GEM_AMC.OH.OH%d.T1Controller.TOGGLE"%(gtx),0x0)
     return
 
 def sendL1A(device,gtx,interval=25,number=0,debug=False):
@@ -553,7 +553,8 @@ def getScanResults(device, gtx, numpoints, debug=False):
 def getUltraScanResults(device, gtx, numpoints, debug=False):
     scanBase = "GEM_AMC.OH.OH%d.ScanController.ULTRA"%(gtx)
     while (readRegister(device,"%s.MONITOR.STATUS"%(scanBase)) > 0):
-        if debug and False:
+        #if debug and False:
+        if debug:
             print "Ultra scan still running (0x%x), not returning results"%(readRegister(device,"%s.MONITOR.STATUS"%(scanBase)))
             pass
         time.sleep(0.1)

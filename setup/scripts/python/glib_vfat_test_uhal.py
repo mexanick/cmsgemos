@@ -161,8 +161,8 @@ gemlogger.debug(msg)
 if options.debug:
     msg = chipids
     gemlogger.debug(msg)
-    msg = controlRegs
-    gemlogger.debug(msg)
+    #msg = controlRegs
+    #gemlogger.debug(msg)
 
 if options.biasAll:
     biasAllVFATs(amc, options.gtx, chipmask)
