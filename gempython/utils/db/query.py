@@ -1,282 +1,58 @@
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gempython.utils.db.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "db.settings")
 import django
 django.setup()
 import datetime
 from time import sleep
-from gempython.utils.db.ldqm_db.models import *
-from gempython.utils.db.ldqm_db.amcmanager import *
+from gempython.tools.ldqm_db.models import *
+from gempython.tools.ldqm_db.amcmanager import *
 
-import gempython.utils.gemlogger as GEMLogger
+from gempython.utils.gemlogger import GEMLogger
 
-query_gemlogger = GEMLogger.getGEMLogger(__name__)
-#query_gemlogger.setLevel(GEMLogger.DEBUG)
+gemlogger = GEMLogger("query").gemlogger
+gemlogger.setLevel(GEMLogger.DEBUG)
 
-def configure_db(station="GEM904",setuptype="teststand",runperiod="2017T",shelf=3):
-  #amc_list=[1,2,3,4,5,6,7,8,9,10,11,12]
-  #geb_list=[[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],]
-  amc_list=[2]
-  geb_list=[[0,],]
+def configure_db(station="CERNP5",setuptype="slicetest",runperiod="2017", runnumber = 1, shelf=1):
+  gebtypes = { "GEMINI01L1":"Short",
+               "GEMINI01L2":"Short",
+               "GEMINI27L1":"Short",
+               "GEMINI27L2":"Short",
+               "GEMINI28L1":"Long",
+               "GEMINI28L2":"Long",
+               "GEMINI29L1":"Short",
+               "GEMINI29L2":"Short",
+               "GEMINI30L1":"Long",
+               "GEMINI30L2":"Long"}
 
-  zlist = zip(amc_list, geb_list)
-  a_list = []
-  for amcN, gtx_list in zlist:
-    msg = "Trying to connect to AMC # %s on shelf %s \n" %(amcN, shelf)
-    query_gemlogger.info(msg)
-    # m_AMCmanager = AMCmanager(shelf,connection_file)
-    m_AMCmanager = AMCmanager()
-    g_list = []
-    #try:
-    #  m_AMCmanager.connect(int(amcN), int(shelf))
-    #except ValueError as ve:
-    #  msg = "AMC # %s is missing, advancing to the next one\n" %(amcN)
-    #  query_gemlogger.info(msg)
-    #  continue
-    # retrieve VFAT slot numberd and ChipIDs from HW
-    m_AMCmanager.connect(int(amcN), int(shelf))
-    msg = "Connection to AMC # %s successful"%(amcN)
-    query_gemlogger.info(msg)
-    for gtx in gtx_list:
-      msg = "Trying to connect to gem.shelf%02d.amc%02d.optohybrid%02d" %(shelf,int(amcN),gtx)
-      query_gemlogger.info(msg)
-      #try:
-      #  manager = uhal.ConnectionManager( self.connection_file )
-      #  ohdevice  = manager.getDevice( "gem.shelf%02d.amc%02d.optohybrid%02d"%(shelf,int(amcN),gtx) )
-      #except:
-      #  msg = 'OH %s is missing!' %(gtx)
-      #  query_gemlogger.info(msg)
-      #  continue
-      connection_file = "file://${GEM_ADDRESS_TABLE_PATH}/connections.xml"
-      manager = uhal.ConnectionManager( connection_file )
-      ohdevice  = manager.getDevice( "gem.shelf%02d.amc%02d.optohybrid%02d"%(shelf,int(amcN),gtx) )
-      if m_AMCmanager.checkGTX(ohdevice, gtx):
-        chipids = m_AMCmanager.getVFATs(ohdevice,gtx)
-        # retrieve VFAT slot numberd and ChipIDs from DB
-        vfats = VFAT.objects.all()
-        # Check if the VFATs are in DB, add if not
-        v_list = []
-        msg = chipids
-        query_gemlogger.debug(msg)
-        msg = chipids.keys()
-        query_gemlogger.debug(msg)
-        for chip in chipids.keys():
-          msg = chip
-          query_gemlogger.debug(msg)
-          t_chipid = "0x%04x"%(chipids[chip])
-          if t_chipid in vfats.filter(Slot=chip).values_list("ChipID", flat=True):
-            pass # ends if t_chipid
-          else:
-            msg = "Adding VFAT(ChipID = %s, Slot = %d)"%(t_chipid,chip)
-            query_gemlogger.info(msg)
-            v = VFAT(ChipID = t_chipid, Slot = chip)
-            v.save()
-            pass # ends else (from if t_chipid)
-          v_list.append(VFAT.objects.get(ChipID = t_chipid, Slot = chip))
-          pass # ends for chip in chipids
-        t_chamberID = 'GTX-'+str(gtx) # use gtx link number now, read from HW later when available
-        msg = "t_chamberID = %s" %(t_chamberID)
-        query_gemlogger.info(msg)
-        gebs = GEB.objects.filter(ChamberID=t_chamberID)
-        t_flag = False
-        for geb in gebs:
-          if v_list == list(geb.vfats.all()):
-            t_flag = True
-            g_list.append(geb)
-            break
-          pass # ends for geb in gebs
-        if t_flag:
-          pass # ends if t_flag
-        else:
-          msg = "Update DB"
-          query_gemlogger.info(msg)
-          g = GEB(Type="Long",ChamberID = t_chamberID)
-          g.save()
-          for v in v_list:
-            g.vfats.add(v)
-            pass # ends for v in v_list
-          g_list.append(g)
-          pass # ends else, from if t_flag
-        pass # ends if m_AMCmanager
-      pass # ends for gtx in gtx_list
+  gebs = { "GEMINI01L1":[0xfebb, 0xfec0, 0xfe38, 0xf957, 0xf774, 0xff74, 0xfebc, 0xf77c, 0xfec4, 0xfef4, 0xffb3, 0xfa0c, 0xff94, 0xfe28, 0xf9b7, 0xf92b, 0xf737, 0xfeb3, 0xf9a0, 0xf993, 0xf75c, 0xfedb, 0xffd4, 0xfe24],
+           "GEMINI01L2":[0xffac, 0xfa38, 0xff7f, 0xfefb, 0xff73, 0xf71c, 0xfff7, 0xfe2c, 0xf9eb, 0xfed7, 0xfa37, 0xf9bb, 0xf96b, 0xfef3, 0xff78, 0xf9bc, 0xfecc, 0xff34, 0xf6bb, 0xfa47, 0xff30, 0xf74b, 0xff9f, 0xfed4],
+           "GEMINI27L1":[0xf758, 0xff68, 0xff2b, 0xf73c, 0xff27, 0xff7c, 0xf72c, 0xff14, 0xff6f, 0xf788, 0xffaf, 0xf73b, 0xf6ac, 0xf6d8, 0xf97b, 0xfec3, 0xf750, 0xfff3, 0xf76f, 0xffd0, 0xffc0, 0xfe3b, 0xf9fc, 0xf9ac],
+           "GEMINI27L2":[0xff97, 0xf9c4, 0xf6f3, 0xfa03, 0xf964, 0xf6c3, 0xfa53, 0xf99f, 0xf718, 0xf9a7, 0xf6b3, 0xf9f4, 0xf93f, 0xf9f3, 0xf748, 0xf70b, 0xff18, 0xfa48, 0xf9dc, 0xfa4f, 0xf988, 0xf723, 0xff38, 0xf730],
+           "GEMINI28L1":[0xf943, 0xf743, 0xf787, 0xf6cb, 0xffdf, 0xff44, 0xf783, 0xfa13, 0xf9f7, 0xf6b0, 0xf6cc, 0xfe27, 0xf920, 0xf968, 0xf77b, 0xff3c, 0xf6ec, 0xff67, 0xffc7, 0xf6dc, 0xf9c8, 0xf6a4, 0xff58, 0xffd7],
+           "GEMINI28L2":[0xfe47, 0xf6b4, 0xf6a3, 0xf72f, 0xfa07, 0xff9c, 0xf77f, 0xff98, 0xf98b, 0xf6e3, 0xff64, 0xffbb, 0xfe43, 0xf98f, 0xf784, 0xf940, 0xff54, 0xff17, 0xf944, 0xf6bf, 0xf9e8, 0xf6ff, 0xf720, 0xf770],
+           "GEMINI29L1":[0xfebf, 0xfe34, 0xffb8, 0xffd3, 0xf9d4, 0xfedf, 0xff1c, 0xfe1f, 0xf738, 0xf9cc, 0xffeb, 0xff70, 0xfa14, 0xff0c, 0xfa24, 0xffe0, 0xff57, 0xfee7, 0xfe37, 0xf9ff, 0xfff8, 0xf707, 0xf9f8, 0xf724],
+           "GEMINI29L2":[0xf6b8, 0xfa10, 0xf9c0, 0xffc8, 0xfe3c, 0xf773, 0xf9b8, 0xffa0, 0xfa2b, 0xfa33, 0xf708, 0xf71f, 0xf767, 0xff10, 0xf96f, 0xfe4b, 0xfee8, 0xf714, 0xfe3f, 0xf6f8, 0xf973, 0xfe20, 0xfee0, 0xf6d4],
+         "GEMINI30L1":[0xf6e7, 0xfec8, 0xf98c, 0xf9e0, 0xffc4, 0xf704, 0xff5f, 0xf978, 0xfe44, 0xf78b, 0xf6df, 0xf777, 0xfa5b, 0xf91b, 0xfed0, 0xfe23, 0xfa1f, 0xf6e8, 0xfa1c, 0xff28, 0xfe2b, 0xffa3, 0xff6c, 0xf953],
+           "GEMINI30L2":[0xf950, 0xf6a8, 0xfed8, 0xf763, 0xf977, 0xf6ab, 0xfa50, 0xf9cb, 0xfeec, 0xf733, 0xfee4, 0xf717, 0xfef8, 0xf734, 0xf924, 0xffb4, 0xf6f4, 0xfa34, 0xf6b7, 0xf72b, 0xffa7, 0xf95f, 0xf6af, 0xff3f]}
+ 
+  
+  amc = AMC(Type="CTP7", BoardID = "eagle33")
+  amc.save()
 
-    t_flag = False
-    t_boardID = "AMC-"+str(amcN) # hard code now, read from HW later when available
-    amcs = AMC.objects.filter(BoardID = t_boardID)
-    for amc in amcs:
-      if g_list == list(amc.gebs.all()):
-        t_flag = True
-        a_list.append(amc)
-        msg = "Adding to a_list : %s" %(amc.BoardID)
-        query_gemlogger.info(msg)
-        pass # ends if g_list
-      pass # ends for amc in amcs
-    if t_flag:
-      pass # ends if t_flag
-    else:
-      msg = "Update DB"
-      query_gemlogger.info(msg)
-      a = AMC(Type="GLIB",BoardID = t_boardID)
-      a.save()
-      for g in g_list:
-        a.gebs.add(g)
-        pass # ends for g in g_list
-      a_list.append(a)
-      msg = "Adding to a_list : %s" %(a.BoardID)
-      query_gemlogger.info(msg)
-      pass # ends else (if t_flag)
-    pass # ends for amcs in amcs
+  for gebname in gebs.keys():
+    chipids = gebs[gebname]
+    gebtype = gebtypes[gebname]
+    geb = GEB(Type=gebtype, ChamberID = gebname)
+    geb.save()
+    for slot in enumerate(chipids):
+      vfat = VFAT(ChipID = chipids[slot], Slot = slot)
+      vfat.save()
+      geb.vfats.add(vfat)
+    amc.gebs.add(geb)
 
   # create a new run. Some values are hard-coded for now
-  runs = Run.objects.filter(Period = runperiod, Station = station)
-  rns = list(int(x) for x in list(runs.values_list("Number", flat=True)))
-  try:
-    nrs = u'%s'%(max(rns)+1)
-  except ValueError as ve:
-    nrs = u'%s'%(1)
-    pass # ends try/except
-  nrs = nrs.zfill(6)
   t_date = str(datetime.datetime.utcnow()).split(' ')[0]
-  m_filename = "run"+str(nrs)+""+"_"+setuptype+"_"+station+"_"+t_date
-  newrun = Run(Name=m_filename, Type = setuptype, Number = str(nrs), Date = t_date, Period = runperiod, Station = station)
+  m_filename = "run"+str(runnumber)+""+"_"+setuptype+"_"+station+"_"+t_date
+  newrun = Run(Name=m_filename, Type = setuptype, Number = str(runnumber), Date = t_date, Period = runperiod, Station = station)
   newrun.save()
-  for a in a_list:
-    msg = "Adding AMC: %s" %(a.BoardID)
-    query_gemlogger.info(msg)
-    newrun.amcs.add(a)
-    for g in a.gebs.all():
-      msg = "Adding GEB: %s" %(g.ChamberID)
-      query_gemlogger.info(msg)
-      pass # ends for g in a.gebs.all
-    pass # ends for a in a_list
-  sleep(0.1) # what is this for?
-import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gempython.utils.db.settings")
-import django
-django.setup()
-import datetime
-from time import sleep
-from gempython.utils.db.ldqm_db.models import *
-from gempython.utils.db.ldqm_db.amcmanager import *
-
-import gempython.utils.gemlogger as GEMLogger
-
-gemlogger = GEMLogger.getGEMLogger(__name__)
-#gemlogger.setLevel(GEMLogger.DEBUG)
-
-def configure_db(station="TIF",setuptype="teststand",runperiod="2016T",shelf=2):
-  amc_list=[1,2,3,4,5,6,7,8,9,10,11,12]
-  geb_list=[[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],[0,1],]
-  zlist = zip(amc_list, geb_list)
-  a_list = []
-  for amcN, gtx_list in zlist:
-    msg = "Trying to connect to AMC # %s\n" %(amcN)
-    gemlogger.info(msg)
-    # m_AMCmanager = AMCmanager(shelf,connection_file)
-    m_AMCmanager = AMCmanager()
-    g_list = []
-    try:
-      m_AMCmanager.connect(int(amcN))
-    except ValueError as ve:
-      continue
-    # retrieve VFAT slot numberd and ChipIDs from HW
-    for gtx in gtx_list:
-      if m_AMCmanager.checkGTX(gtx):
-        chipids = m_AMCmanager.getVFATs(gtx)
-        # retrieve VFAT slot numberd and ChipIDs from DB
-        vfats = VFAT.objects.all()
-        # Check if the VFATs are in DB, add if not
-        v_list = []
-        msg = chipids
-        gemlogger.debug(msg)
-        msg = chipids.keys()
-        gemlogger.debug(msg)
-        for chip in chipids.keys():
-          msg = chip
-          gemlogger.debug(msg)
-          t_chipid = "0x%04x"%(chipids[chip])
-          if t_chipid in vfats.filter(Slot=chip).values_list("ChipID", flat=True):
-            pass # ends if t_chipid
-          else:
-            msg = "Adding VFAT(ChipID = %s, Slot = %d)"%(t_chipid,chip)
-            gemlogger.info(msg)
-            v = VFAT(ChipID = t_chipid, Slot = chip)
-            v.save()
-            pass # ends else (from if t_chipid)
-          v_list.append(VFAT.objects.get(ChipID = t_chipid, Slot = chip))
-          pass # ends for chip in chipids
-        t_chamberID = 'GTX-'+str(gtx) # use gtx link number now, read from HW later when available
-        msg = "t_chamberID = %s" %(t_chamberID)
-        gemlogger.info(msg)
-        gebs = GEB.objects.filter(ChamberID=t_chamberID)
-        t_flag = False
-        for geb in gebs:
-          if v_list == list(geb.vfats.all()):
-            t_flag = True
-            g_list.append(geb)
-            break
-          pass # ends for geb in gebs
-        if t_flag:
-          pass # ends if t_flag
-        else:
-          msg = "Update DB"
-          gemlogger.info(msg)
-          g = GEB(Type="Long",ChamberID = t_chamberID)
-          g.save()
-          for v in v_list:
-            g.vfats.add(v)
-            pass # ends for v in v_list
-          g_list.append(g)
-          pass # ends else, from if t_flag
-        pass # ends if m_AMCmanager
-      pass # ends for gtx in gtx_list
-
-    t_flag = False
-    t_boardID = "AMC-"+str(amcN) # hard code now, read from HW later when available
-    amcs = AMC.objects.filter(BoardID = t_boardID)
-    for amc in amcs:
-      if g_list == list(amc.gebs.all()):
-        t_flag = True
-        a_list.append(amc)
-        msg = "Adding to a_list : %s" %(amc.BoardID)
-        gemlogger.info(msg)
-        pass # ends if g_list
-      pass # ends for amc in amcs
-    if t_flag:
-      pass # ends if t_flag
-    else:
-      msg = "Update DB"
-      gemlogger.info(msg)
-      a = AMC(Type="GLIB",BoardID = t_boardID)
-      a.save()
-      for g in g_list:
-        a.gebs.add(g)
-        pass # ends for g in g_list
-      a_list.append(a)
-      msg = "Adding to a_list : %s" %(a.BoardID)
-      gemlogger.info(msg)
-      pass # ends else (if t_flag)
-    pass # ends for amcs in amcs
-
-  # create a new run. Some values are hard-coded for now
-  runs = Run.objects.filter(Period = runperiod, Station = station)
-  rns = list(int(x) for x in list(runs.values_list("Number", flat=True)))
-  try:
-    nrs = u'%s'%(max(rns)+1)
-  except ValueError as ve:
-    nrs = u'%s'%(1)
-    pass # ends try/except
-  nrs = nrs.zfill(6)
-  t_date = str(datetime.datetime.utcnow()).split(' ')[0]
-  m_filename = "run"+str(nrs)+""+"_"+setuptype+"_"+station+"_"+t_date
-  newrun = Run(Name=m_filename, Type = setuptype, Number = str(nrs), Date = t_date, Period = runperiod, Station = station)
-  newrun.save()
-  for a in a_list:
-    msg = "Adding AMC: %s" %(a.BoardID)
-    gemlogger.info(msg)
-    newrun.amcs.add(a)
-    for g in a.gebs.all():
-      msg = "Adding GEB: %s" %(g.ChamberID)
-      gemlogger.info(msg)
-      pass # ends for g in a.gebs.all
-    pass # ends for a in a_list
-  sleep(0.1) # what is this for?
+  newrun.amcs.add(amc)

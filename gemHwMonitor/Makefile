@@ -16,7 +16,7 @@ GEMHWMONITOR_VER_PATCH=1
 include $(BUILD_HOME)/$(Project)/config/mfDefs.gem
 
 Sources =version.cc
-Sources+=gemHwMonitorWeb.cc gemHwMonitorBase.cc
+Sources+=gemHwMonitorWeb.cc 
 
 DynamicLibrary=gemhwMonitor
 
