@@ -17,7 +17,7 @@ include $(BUILD_HOME)/$(Project)/config/mfDefs.gem
 
 Sources =version.cc
 Sources+=utils/GEMCrateUtils.cc
-Sources+=GEMHwDevice.cc HwGenericAMC.cc
+Sources+=GEMHwDevice.cc HwGenericAMC.cc GEMHwInterface.cc
 Sources+=vfat/HwVFAT2.cc
 Sources+=glib/HwGLIB.cc
 Sources+=optohybrid/HwOptoHybrid.cc
@@ -34,6 +34,7 @@ IncludeDirs+=$(BUILD_HOME)/$(Project)/gemutils/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gembase/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gemreadout/include
 IncludeDirs+=$(uHALROOT)/include
+IncludeDirs+=$(XHAL_ROOT)/include
 
 DependentLibraryDirs+=$(BUILD_HOME)/$(Project)/gemutils/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
 DependentLibraryDirs+=$(BUILD_HOME)/$(Project)/gembase/lib/$(XDAQ_OS)/$(XDAQ_PLATFORM)
