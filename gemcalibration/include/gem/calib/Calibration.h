@@ -20,7 +20,7 @@
 namespace gem {
   namespace calib {
 
-    enum calType {NDEF, PHASE, LATENCY, SCURVE, SBITRATE, THRESHOLD, TRIMDAC, DACSCANV3, TEMPERATURE, SBITREADOUT, SBITMAPANDRATE}; 
+    enum calType {NDEF, GBTPHASE, LATENCY, SCURVE, SBITARMDACSCAN, ARMDACSCAN, TRIMDAC, DACSCANV3, CALIBRATEARMDAC}; 
     typedef enum calType calType_t;
 
     class Calibration : public gem::base::GEMApplication
@@ -54,7 +54,7 @@ namespace gem {
 	
         void applyAction(xgi::Input *in, xgi::Output *out)
           throw (xgi::exception::Exception);
-        //
+        
         void setCalType(xgi::Input *in, xgi::Output *out)
           throw (xgi::exception::Exception);
 
@@ -63,7 +63,7 @@ namespace gem {
         calType_t m_calType;
 	
         std::map<calType_t, std::map<std::string, uint32_t>> m_scanParams{
-            {PHASE  ,{{"nSamples",0},{"trigType", 0},}},
+            {GBTPHASE  ,{{"nSamples",0},{"trigType", 0},}},
             {LATENCY,{
                 {"nSamples"  , 100},
                 {"trigType"  , 0},
@@ -75,10 +75,12 @@ namespace gem {
                 {"vfatChMin" , 0},
                 {"vfatChMax" , 0},
                 {"vt2"       , 0},
+		{"trigThrottle"  ,100},
+                {"signalSourceType"       , 0},
                 }},
             {SCURVE,{
                 {"nSamples"  , 100},
-                {"trigType"  , 0},
+		{"trigType"  , 0}, // TODO: TTC local should be only possible one
                 {"l1aTime"   , 250},
                 {"pulseDelay", 40},
                 {"latency"   , 33},
@@ -86,15 +88,64 @@ namespace gem {
                 {"vfatChMax" , 127},
                 {"calPhase"  , 0},
                 }},
-            {SBITRATE  ,{{"nSamples",0},{"trigType", 0},}},
-            {THRESHOLD  ,{{"nSamples",0},{"trigType", 0},}},
-            {TRIMDAC  ,{{"nSamples",0},{"trigType", 0},}},
-            {DACSCANV3  ,{{"nSamples",0},{"trigType", 0},}},
-            {TEMPERATURE  ,{{"nSamples",0},{"trigType", 0},}},
-            {SBITREADOUT  ,{{"acquisitionTime",0},{"trigType", 0},}},
-            {SBITMAPANDRATE  ,{{"nSamples",0},{"trigType", 0},}},
+	    {SBITARMDACSCAN  ,{
+		{"nSamples",0},
+		{"comparatorType",0},
+		{"perChannelType",0},
+		{"vfatChMin" , 0},
+                {"vfatChMax" , 0},
+		}},
+	    {ARMDACSCAN  ,{
+		{"nSamples"  , 0},
+		{"trigType"  , 0},
+		{"vfatChMin" , 0},
+		{"vfatChMax" , 0},
+		{"vt2"       , 0},
+		}},
+            {TRIMDAC  , {
+		{"nSamples"   , 0}, 
+		{"trigType"   , 0}, // TODO: TTC local should be only possible one
+		{"nSamples"   , 0},
+		{"l1aTime"    , 250},
+                {"pulseDelay" , 40},
+                {"latency"    , 33},
+		{"mspl"       , 4},
+		{"trimValues" , 0},// TODO: need to be implemented properly as taking array of numbers 
+                                   // TODO: need to implement interaction with DB to get proper configurations per ARM DAC
+		}},
+	    {DACSCANV3  ,{
+	       {"nSamples",0},
+	       {"adcType",0}
+	      }},// TODO: drop down with DACs to select to scan on, and a select all button
+	    {CALIBRATEARMDAC,{
+	       {"nSamples"  , 100},
+	       {"trigType"  , 0}, // TODO: TTC local should be only possible one
+               {"l1aTime"   , 250},
+               {"pulseDelay", 40},
+               {"latency"   , 33},
+               {"armDacList" , 0},// TODO: need to be implemented properly as taking array of numbers 
+            
+               {"calPhase"  , 0}, 
+	       }}  
         };
-
+	std::map< std::string,std::string > m_scanParamsLabels{
+	  {"nSamples"  , "Number of samples"},
+	  {"l1aTime"   , "L1A period (BX)"},
+	  {"calPhase"  , "CalPulse phase ()"},
+          {"mspl"      , "Pulse stretch (int)"},
+	  {"scanMin"   , "Scan min ()"},
+          {"scanMax"   , "Scan max ()"},
+          {"vfatChMin" , "VFAT Ch min"},
+          {"vfatChMax" , "VAT Ch max"},
+          {"vt2"       , "CFG_THR_ARM_DAC"},
+          {"trigThrottle"  , "Trigger throttle (int)"},
+	  {"pulseDelay", "Pulse delay (BX)"},
+	  {"latency"   , "Latency (BX)"},
+	  {"timeInterval", "Interval bw measur. (s)"},
+	  {"rates", "Rates (Hz)"} , // TODO: need to be implemented properly as taking array of numbers
+	  {"armDacList", "List of ARM DAC settings to scan"}, // TODO: need to be implemented properly as taking array of numbers
+	  {"trimValues", "Points in DAC range"}, // TODO: need to be implemented properly as taking array of numbers
+	    };
         std::map<std::string, uint32_t> amc_optical_links;
 
       protected:
@@ -111,16 +162,14 @@ namespace gem {
         log4cplus::Logger m_logger; //FIXME should be removed!
         std::string m_state;
         const std::map<std::string, calType_t> m_calTypeSelector{
-            {"Phase Scan"                , PHASE},
-            {"Latency Scan"              , LATENCY},
-            {"S-curve Scan"              , SCURVE},
-            {"S-bit Rate Scan"           , SBITRATE},
-            {"Threshold DAC Scan"        , THRESHOLD},
-            {"DAC trimming"              , TRIMDAC},
-            {"DAC Scan on VFAT3"         , DACSCANV3},
-            {"Temperature Scan"          , TEMPERATURE},
-            {"SbitReadOut Scan"          , SBITREADOUT},
-            {"Sbit Map And Rate Scan"    , SBITMAPANDRATE},
+	    {"GBT Phase Scan"                , GBTPHASE},
+	    {"Latency Scan"                  , LATENCY},
+	    {"S-curve Scan"                  , SCURVE},
+            {"S-bit ARM DAC Scan"            , SBITARMDACSCAN},
+            {"ARM DAC Scan"                  , ARMDACSCAN},
+            {"Derive DAC Trim Registers"     , TRIMDAC},
+            {"DAC Scan on VFAT3"             , DACSCANV3},
+            {"Calibrate CFG_THR_ARM_DAC"     , CALIBRATEARMDAC},
 	    
         };
       };
