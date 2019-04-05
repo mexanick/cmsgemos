@@ -53,6 +53,21 @@ function deselect_links()
     masks.attr('value','0x000');
 };
 
+function select_dacscans()
+{
+    $.event.preventDefault();
+    var checkboxes = $('form#dacScanV3_select').find(':checkbox');
+    checkboxes.prop('checked', true);
+};
+
+function deselect_dacscans()
+{
+    $.event.preventDefault();
+    var checkboxes = $('form#dacScanV3_select').find(':checkbox');
+    checkboxes.prop('checked', false);  
+};
+
+
 function run_scan()
 {
     if (window.jQuery) {

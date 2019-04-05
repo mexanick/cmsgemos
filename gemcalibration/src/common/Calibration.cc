@@ -137,6 +137,11 @@ void gem::calib::Calibration::applyAction(xgi::Input* in, xgi::Output* out)
         it.second = cgi[it.first]->getIntegerValue();
         CMSGEMOS_DEBUG("Calibration::applyAction : " << it.first << " = " << it.second);
     }
+    for (auto it: m_dacScanTypeParams.find(m_dacScanType)->second){
+        it.second = cgi[it.first]->getIntegerValue();
+        CMSGEMOS_DEBUG("Calibration::applyAction m_dacScanType: " << it.first << " = " << it.second);
+    }
+    
     std::stringstream t_stream;
     t_stream.clear();
     t_stream.str(std::string());
@@ -174,11 +179,12 @@ void gem::calib::Calibration::applyAction(xgi::Input* in, xgi::Output* out)
     } else {
         *out << "{\"status\":0,\"alert\":\"Parameters successfully applied. Now you can run the scan.\"}";
     }
-<<<<<<< HEAD
 
-
-=======
->>>>>>> fac3430978f65193e57515f4554169ac0f7788cf
+     std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
+    // std::cout<<" m_dacScanType 0 "<< m_dacScanType["CFG_CAL_DAC"].first <<std::endl;
+     for(it=m_dacScanTypeParams.begin();it!=m_dacScanTypeParams.end();it++){
+       std::cout<<" m_dacScanType 0 "<< m_dacScanTypeParams_label.find(it->first)->second <<std::endl;
+     }
 }
 
 void gem::calib::Calibration::setCalType(xgi::Input* in, xgi::Output* out)

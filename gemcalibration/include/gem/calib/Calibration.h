@@ -16,6 +16,7 @@
 
 #define NAMC 12
 #define NSHELF 2
+#define NDACSCAN 1 //19
 
 namespace gem {
   namespace calib {
@@ -23,6 +24,11 @@ namespace gem {
     enum calType {NDEF, GBTPHASE, LATENCY, SCURVE, SBITARMDACSCAN, ARMDACSCAN, TRIMDAC, DACSCANV3, CALIBRATEARMDAC}; 
     typedef enum calType calType_t;
 
+
+    enum dacScanType {CFG_CAL_DAC}; 
+    typedef enum dacScanType dacScanType_t;
+
+    
     class Calibration : public gem::base::GEMApplication
       {
 
@@ -61,7 +67,7 @@ namespace gem {
         std::vector<Calibration*> v_gemcal;
 
         calType_t m_calType;
-	
+
         std::map<calType_t, std::map<std::string, uint32_t>> m_scanParams{
             {GBTPHASE  ,{{"nSamples",0},{"trigType", 0},}},
             {LATENCY,{
@@ -115,7 +121,8 @@ namespace gem {
 		}},
 	    {DACSCANV3  ,{
 	       {"nSamples",0},
-	       {"adcType",0}
+	       {"adcType",0},
+	       {"dacScanType",0},	   
 	      }},// TODO: drop down with DACs to select to scan on, and a select all button
 	    {CALIBRATEARMDAC,{
 	       {"nSamples"  , 100},
@@ -147,6 +154,19 @@ namespace gem {
 	  {"trimValues", "Points in DAC range"}, // TODO: need to be implemented properly as taking array of numbers
 	    };
         std::map<std::string, uint32_t> amc_optical_links;
+
+	dacScanType_t m_dacScanType;
+	std::map<dacScanType_t,  std::map<std::string, uint32_t>> m_dacScanTypeParams{
+	  {CFG_CAL_DAC,{
+	      {"CFG_CAL_DAC_Min"  , 0},
+	      {"CFG_CAL_DAC_Max"  , 250},
+		}},
+	    };
+	std::map<dacScanType_t,  std::string > m_dacScanTypeParams_label{
+	  {CFG_CAL_DAC, "CFG_CAL_DAC"},
+       
+	};
+	
 
       protected:
         /* virtual bool calibrationAction(toolbox::task::WorkLoop *wl); */
