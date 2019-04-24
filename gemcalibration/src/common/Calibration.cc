@@ -28,11 +28,17 @@ typedef gem::base::utils::GEMInfoSpaceToolBox::UpdateType GEMUpdateType;
 XDAQ_INSTANTIATOR_IMPL(gem::calib::Calibration);
 
 gem::calib::Calibration::Calibration(xdaq::ApplicationStub* stub) :
-  gem::base::GEMApplication(stub)
+  gem::base::GEMApplication(stub),
+  m_nShelves(0)
 {
     CMSGEMOS_DEBUG("gem::calib::Calibration : Creating the CalibrationWeb interface");
     p_gemWebInterface = new gem::calib::CalibrationWeb(this);
     m_calType = NDEF;
+    CMSGEMOS_DEBUG("gem::calib::Calibration : Retrieving configuration");
+    p_appInfoSpace->fireItemAvailable("nShelves",     &m_nShelves);
+    p_appInfoSpace->addItemRetrieveListener("nShelves", this);
+    p_appInfoSpace->addItemChangedListener("nShelves", this);
+    CMSGEMOS_DEBUG("gem::calib::Calibration : configuration retrieved");
     /*
     xgi::bind(this, &Calibration::stopAction, "stopAction");
     xgi::bind(this, &Calibration::resumeAction, "resumeAction");
@@ -57,7 +63,7 @@ void gem::calib::Calibration::actionPerformed(xdata::Event& event)
     if (event.type() == "setDefaultValues" || event.type() == "urn:xdaq-event:setDefaultValues") {
       CMSGEMOS_DEBUG("gem::calib::Calibration::actionPerformed() setDefaultValues" <<
             "Default configuration values have been loaded from xml profile");
-      //init();
+      init();
     }
     
     // item is changed, update it
@@ -71,6 +77,8 @@ void gem::calib::Calibration::actionPerformed(xdata::Event& event)
 
 void gem::calib::Calibration::init()
 {
+
+      CMSGEMOS_INFO("gem::calib::Calibration:init() number of shelves: " << m_nShelves.value_);
   /*  v_daqmon.clear();
       v_daqmon.reserve(NAMC);
       for (int i = 1; i <= NAMC; ++i)

@@ -4,8 +4,12 @@
               xmlns:xc="http://xdaq.web.cern.ch/xdaq/xsd/2004/XMLConfiguration-30">
 
 
-  <xc:Context url="http://gem904daq02:20500">
+  <xc:Context url="http://gem904daq02:20504">
     <xc:Application class="gem::calib::Calibration" id="30" instance="0" network="local">
+      <properties xmlns="urn:xdaq-application:ShelfMonitor"
+                  xsi:type="soapenc:Struct">
+        <nShelves  xsi:type="xsd:integer">5</nShelves>
+      </properties>
     </xc:Application>
 
 

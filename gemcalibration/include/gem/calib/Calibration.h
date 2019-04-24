@@ -212,7 +212,7 @@ namespace gem {
          * @throws
          */
         bool isGEMApplication(const std::string& classname) const;
-        xdata::Integer m_shelfID;
+        xdata::Integer m_nShelves;
         log4cplus::Logger m_logger; //FIXME should be removed!
         std::string m_state;
         const std::map<std::string, calType_t> m_calTypeSelector{
