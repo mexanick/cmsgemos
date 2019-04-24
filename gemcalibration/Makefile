@@ -7,8 +7,8 @@ ShortProject=gem
 Package=gemcalibration
 LongPackage=gemcalibration
 
-ShortPackage=gemcal
-PackageName=gemcalibration
+ShortPackage=calib
+PackageName=calib
 
 GEMCALIBRATION_VER_MAJOR=0
 GEMCALIBRATION_VER_MINOR=2
@@ -25,12 +25,15 @@ DynamicLibrary=gemcalibration
 IncludeDirs+=$(BUILD_HOME)/$(Project)/$(Package)/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gembase/include
 IncludeDirs+=$(BUILD_HOME)/$(Project)/gemutils/include
-IncludeDirs+=/opt/xhal/include
+IncludeDirs+=$(XHAL_ROOT)/include
 
-DependentLibraryDirs+=/opt/xhal/lib
+#DependentLibraryDirs+=/opt/xhal/lib
+UserCFlags  +=$(PYTHONCFLAGS)
+UserCCFlags +=$(PYTHONCFLAGS)
+
+DependentLibraryDirs+=$(XHAL_ROOT)/lib
 DependentLibraries+=xhal
 DependentLibraries+=boost_iostreams
-
 
 include $(XDAQ_ROOT)/config/Makefile.rules
 include $(BUILD_HOME)/$(Project)/config/mfRPMDefsGEM.mk

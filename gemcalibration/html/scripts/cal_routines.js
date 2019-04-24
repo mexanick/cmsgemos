@@ -55,16 +55,16 @@ function deselect_links()
 
 function select_dacscans()
 {
-    $.event.preventDefault();
+    //$.event.preventDefault();
     var checkboxes = $('form#dacScanV3_select').find(':checkbox');
     checkboxes.prop('checked', true);
 };
 
 function deselect_dacscans()
 {
-    $.event.preventDefault();
+    //$.event.preventDefault();
     var checkboxes = $('form#dacScanV3_select').find(':checkbox');
-    checkboxes.prop('checked', false);  
+    checkboxes.prop('checked', false);
 };
 
 

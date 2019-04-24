@@ -28,21 +28,6 @@ namespace gem {
 //
         void settingsInterface(calType_t m_calType, xgi::Output *out)
           throw (xgi::exception::Exception);
-//	
-        void triggerSelector(xgi::Output *out)
-          throw (xgi::exception::Exception);
-//
-        void comparatorSelector(xgi::Output *out)
-          throw (xgi::exception::Exception);
-//
-        void signalSourceSelector(xgi::Output *out)
-          throw (xgi::exception::Exception);
-//
-        void perChannelTypeSelector(xgi::Output *out)
-          throw (xgi::exception::Exception);
-//
-        void adcTypeSelector(xgi::Output *out)
-          throw (xgi::exception::Exception);
 //
         void slotsAndMasksSelector(xgi::Output *out)
           throw (xgi::exception::Exception);
@@ -53,9 +38,13 @@ namespace gem {
         void dacScanV3Selector(xgi::Output *out)
           throw (xgi::exception::Exception);
 //
-        void genericParamSelector_dacScan(std::string labelName, std::string paramName, int defaultValue, xgi::Output *out)
+        void genericParamSelector_dacScan( std::string paramName, int defaultValue, xgi::Output *out)
           throw (xgi::exception::Exception);
-
+//	
+        void genericRadioSelector(std::string paramName, gem::calib::Calibration::scanParamsRadioSelector radio_param, xgi::Output *out)
+          throw (xgi::exception::Exception);
+//
+	
       protected:
         virtual void webDefault(  xgi::Input *in, xgi::Output *out )
           throw (xgi::exception::Exception);

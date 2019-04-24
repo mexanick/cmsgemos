@@ -95,66 +95,21 @@ void gem::calib::CalibrationWeb::applicationPage(xgi::Input* in, xgi::Output* ou
   //*out << "</div>" << std::endl;
 }
 
-
-void gem::calib::CalibrationWeb::triggerSelector(xgi::Output* out)
+void gem::calib::CalibrationWeb::genericRadioSelector( std::string paramName, gem::calib::Calibration::scanParamsRadioSelector radio_param  ,xgi::Output* out)
   throw (xgi::exception::Exception)
 {
-    *out << "<h2><span class=\"label label-warning col-md-6\">TRIGGER SOURCE"<< "</span></h2>"
+  *out << "<h2><span class=\"label label-warning col-md-6\">"<< radio_param.label << "</span></h2>"
     << "<div class=\"col-md-6\">"
-        << "<div class=\"form-check\">"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"trigType\" id=\"trig_radio_0\" value=0 checked>TTC input</label></div>"
-	    << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"trigType\" id=\"trig_radio_1\" value=2>Loopback</label></div>"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"trigType\" id=\"trig_radio_2\" value=3>Lemo/T3</label></div>"
-        << "</div>"
+        << "<div class=\"form-check\">" << std::endl;
+    
+      for (unsigned int i=0; i< radio_param.radio_options.size() ;i++)
+	
+	if (i==0)
+	  *out<<"<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\""<<paramName<<"\" id=\""<<paramName<<"_radio_"<<i<<"\" value="<<i<<" checked>"<<radio_param.radio_options[i]<<"</label></div>"<< std::endl;
+	else *out<< "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\""<<paramName<<"\" id=\""<<paramName<<"_radio_"<<i<<"\" value="<<i<<">"<<radio_param.radio_options[i]<<"</label></div>"<< std::endl;
+      
+        *out<< "</div>"
     << "</div>" << std::endl;
-}
-
-void gem::calib::CalibrationWeb::comparatorSelector(xgi::Output* out)
-  throw (xgi::exception::Exception)
-{
-    *out << "<h2><span class=\"label label-warning col-md-6\">COMPARATOR TYPE"<< "</span></h2>"
-    << "<div class=\"col-md-6\">"
-        << "<div class=\"form-check\">"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"comparatorType\" id=\"comparator_radio_0\" value=0>Arming comparator</label></div>"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"comparatorType\" id=\"comparator_radio_1\" value=1 checked>CFD</label></div>"
-        << "</div>"
-    << "</div>" << std::endl;    
-}
-
-void gem::calib::CalibrationWeb::signalSourceSelector(xgi::Output* out)
-  throw (xgi::exception::Exception)
-{
-    *out << "<h2><span class=\"label label-warning col-md-6\">SIGNAL SOURCE"<< "</span></h2>"
-    << "<div class=\"col-md-6\">"
-        << "<div class=\"form-check\">"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"signalSourceType\" id=\"signalSource_radio_0\" value=0>Particle</label></div>"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"signalSourceType\" id=\"signalSource_radio_1\" value=1 checked>Calibration pulse</label></div>"
-        << "</div>"
-    << "</div>" << std::endl;    
-}
-
-void gem::calib::CalibrationWeb::perChannelTypeSelector(xgi::Output* out)//TODO should be set for Sbit Rate scan 
-  throw (xgi::exception::Exception)
-{
-    *out << "<h2><span class=\"label label-warning col-md-6\">SCAN PER-CHANNEL"<< "</span></h2>"
-    << "<div class=\"col-md-6\">"
-        << "<div class=\"form-check\">"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"perChannelType\" id=\"perChannel_radio_0\" value=0 checked>False</label></div>"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"perChannelType\" id=\"perChannel_radio_1\" value=1>True</label></div>"
-        << "</div>"
-    << "</div>" << std::endl;    
-}
-
-void gem::calib::CalibrationWeb::adcTypeSelector(xgi::Output* out)//TODO should be set for Sbit Rate scan 
-  throw (xgi::exception::Exception)
-{
-    *out << "<h2><span class=\"label label-warning col-md-6\">VFAT ADC reference"<< "</span></h2>"
-    << "<div class=\"col-md-6\">"
-        << "<div class=\"form-check\">"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"adcType\" id=\"adc_radio_0\" value=0 checked>Internal</label></div>"
-            << "<div class=\"form-check-input radio-inline\"> <label><input type=\"radio\" name=\"adcType\" id=\"adc_radio_1\" value=1>External</label></div>"
-        << "</div>"
-    << "</div>" << std::endl;    
 }
 
 void gem::calib::CalibrationWeb::genericParamSelector(std::string labelName, std::string paramName, int defaultValue, xgi::Output* out)
@@ -166,10 +121,15 @@ void gem::calib::CalibrationWeb::genericParamSelector(std::string labelName, std
     << "</div>" << std::endl;    
 }
 
-void gem::calib::CalibrationWeb::genericParamSelector_dacScan(std::string labelName, std::string paramName, int defaultValue, xgi::Output* out)
+void gem::calib::CalibrationWeb::genericParamSelector_dacScan( std::string paramName, int defaultValue, xgi::Output* out)
   throw (xgi::exception::Exception)
 {
-    *out << "<h4><span class=\"label label-success col-md-6\">" << labelName << "</span></h2>"
+  std::string  labelName_tmp;
+  if (paramName.find("Max")!=std::string::npos) labelName_tmp="Max";
+  else if (paramName.find("Min")!=std::string::npos) labelName_tmp="Min";
+  else labelName_tmp=paramName;
+  
+    *out << "<h4><span class=\"label label-success col-md-6\">" << labelName_tmp << "</span></h2>"
     << "<div class=\"col-md-6\">"
         << "<input type=\"text\" value=\"" << defaultValue << "\" class=\"form-control\" name=\"" << paramName << "\">"
     << "</div>" << std::endl;    
@@ -255,57 +215,59 @@ void gem::calib::CalibrationWeb::dacScanV3Selector(xgi::Output* out)
     t_stream.clear();
     t_stream.str(std::string());
 
-     *out << "<div class=\"panel panel-default\">"
+    *out << "<div class=\"panel panel-default\">"
         << "<div class=\"panel-heading\">"
             << "<div class=\"row\">"
-                << "<div class=\"col-md-6\">"
+                << "<div class=\"col-md-12\">"
                     << "<h4>DAC scan type</h4>"
-                << "</div>"
-                << "<div class=\"col-md-6\">"
-                    << "<h4>Settings</h4>"
                 << "</div>"
             << "</div>" 
         << "</div>" << std::endl; // end panel heaing
         // panel body
         *out << "<form id=\"dacScanV3_select\">" << std::endl;
             *out << "<div class=\"container\" id=\"dacScanV3_selection\">" << std::endl;
-	    std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
-	    for(it=dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_dacScanTypeParams.begin();it!=dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_dacScanTypeParams.end();it++){
-	            t_stream.clear();
+	    *out << "<div class=\"dropdown\">"
+                                << "<button id=\"dacScan_dropdown_button\" class=\"btn btn-lg btn-outline dropdown-toggle\" data-toggle=\"dropdown\">Settings</button>"
+                                << "<div class=\"dropdown-menu pre-scrollable\">" << std::endl;
+		   
+    	    std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
+    	    for(it=dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_dacScanTypeParams.begin();it!=dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_dacScanTypeParams.end();it++){
+    	            t_stream.clear();
                     t_stream.str(std::string());
                     t_stream << dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_dacScanTypeParams_label.find(it->first)->second ;
-                    *out << "<div class=\"row\">"
-                        << "<div class=\"col-md-3\">"
-                            << "<div class=\"checkbox\">" 
-                                << "<label> <input type=\"checkbox\" class=\"check\" name=\""
-                                <<  t_stream.str() << "\" id=\"" << t_stream.str() 
-                                << "\">" << t_stream.str() << "</label>"
-                            << " </div>"
-                        << "</div>"
-                        << "<div class=\"col-md-9\">"
-                            << "<div class=\"dropdown\">"
-                                << "<button id=\"dacScan_dropdown_button\" class=\"btn btn-lg btn-outline dropdown-toggle\" data-toggle=\"dropdown\">Select DAC scan type</button>"
-                                << "<div class=\"dropdown-menu pre-scrollable\">" << std::endl;
-		               
-		    std::map<std::string, uint32_t> t_dacScan_parameters = it->second;
-		                for (auto dacScan_parameter: t_dacScan_parameters) {
-				  this->genericParamSelector_dacScan( dacScan_parameter.first, dacScan_parameter.first, dacScan_parameter.second, out);
-				}
-				 
-                                *out << "</div>"
-                            << "</div>" // end <div class="dropdown">
-                        << "</div>" // end <div class="col">
-                    << "</div>" << std::endl; // end <div class="row">
+                    
+                          *out << "<div class=\"row\">" 
+			       << "<div class=\"col-md-4\">"   << std::endl;
+		                    *out<< "<div class=\"checkbox\">" 
+					<< "<label> <input type=\"checkbox\" class=\"check\" name=\""
+					<<  t_stream.str() << "\" id=\"" << t_stream.str() 
+					<< "\">" << t_stream.str() << "</label>"
+					<< " </div>" << std::endl;
+			         *out<< "</div>"<< std::endl;//end column
+                      
+                        
+                          
+			 
+					 std::map<std::string, uint32_t> t_dacScan_parameters = it->second;
+		                         for (auto dacScan_parameter: t_dacScan_parameters) {
+					   *out<< "<div class=\"col-md-4\">" <<std::endl;   
+    				           this->genericParamSelector_dacScan(  dacScan_parameter.first, dacScan_parameter.second, out);
+					   *out << "</div>"<< std::endl;//end column	 
+					 }
+			 
+                   *out << "</div>" << std::endl; // end <div class="row">
+					 
                 } // end loop over DAC scan type
-            *out << "</div>" << std::endl; // end container
+            *out << "</div>" << std::endl; // end drop-down scrollable
+	    *out << "</div>" << std::endl; // end drop-down
+	    *out << "</div>" << std::endl; // end container
         *out << "</form>"<< std::endl;
 
     *out << "<div align=\"center\">"<< std::endl;
         *out << "<button class=\"btn btn-lg btn-info\" onclick=\"select_dacscans()\">SELECT ALL</button>" << std::endl;
         *out << "<button class=\"btn btn-lg btn-warning\" onclick=\"deselect_dacscans()\">DESELECT ALL</button>" << std::endl;
     *out << "</div>"<< std::endl;
-    *out << "</div>" << std::endl; // end panel
-    
+*out << "</div>" << std::endl; // end panel
 }
 
 
@@ -321,50 +283,47 @@ void gem::calib::CalibrationWeb::settingsInterface(calType_t m_calType, xgi::Out
             << "</div>" << std::endl;
         *out << "</div>" << std::endl;
         *out << "<div class=\"row\">" << std::endl;
+	*out << "<div class=\"col-md-6\">" << std::endl;
             *out << "<form id=\"settings_select\">" << std::endl;
-                *out << "<div class=\"col-md-6\">" << std::endl;
+              
                     // create a temporary parameters map,
                     // check whether requested calibration type needs a trigger selector
                     // if it is, create it and pop out the trigger setting
                     std::map<std::string, uint32_t> t_parameters = dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_scanParams.find(m_calType)->second;
-                    if (t_parameters.count("trigType") == 1){
-                        this->triggerSelector(out);
-	                    *out << "<br><br><br>" << std::endl;
-                        t_parameters.erase("trigType");
-                    }
-		    if (t_parameters.count("signalSourceType") == 1){
-                        this->signalSourceSelector(out);
-	                    *out << "<br><br>" << std::endl;
-                        t_parameters.erase("signalSourceType");
-                    }
-		    if (t_parameters.count("comparatorType") == 1){
-                        this->comparatorSelector(out);
-	                    *out << "<br>" << std::endl;
-                        t_parameters.erase("comparatorType");
-                    }
-		    if (t_parameters.count("perChannelType") == 1){
-                        this->perChannelTypeSelector(out);
-	                    *out << "<br>" << std::endl;
-                        t_parameters.erase("perChannelType");
-                    }
-		    if (t_parameters.count("adcType") == 1){
-                        this->adcTypeSelector(out);
-	                    *out << "<br><br>" << std::endl;
-                        t_parameters.erase("adcType");
-                    }
-
-		    if (t_parameters.count("dacScanType") == 1){
-                        this->dacScanV3Selector(out);
-	                    *out << "<br>" << std::endl;
-                        t_parameters.erase("dacScanType");
-                    }
-
                     for (auto parameter: t_parameters) {
+		      if (dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_scanParamsNonForm.find(parameter.first) !=dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_scanParamsNonForm.end() ){
+			this->genericRadioSelector( parameter.first,  dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_scanParamsRadioSelector.find(parameter.first)->second, out);
+			*out << "<br>" << std::endl;
+			t_parameters.erase(parameter.first);
+		      } else continue; 
+	      
+		    }
+		    for (auto parameter: t_parameters) {
+		      
+		      
 		      this->genericParamSelector( dynamic_cast<gem::calib::Calibration*>(p_gemApp)->m_scanParamsLabels.find(parameter.first)->second, parameter.first, parameter.second, out);
-                    }
-                *out << "</div>" << std::endl;
+		      *out << "<br>" << std::endl;
+		    }
+		    
+                    
+               
             *out << "</form>"<< std::endl;
-            *out << "<div class=\"col-md-6\">" << std::endl;
+	    //*out << "</div>" << std::endl; //column ends
+            *out << "<br>" << std::endl;
+
+	    //*out << "</div>" << std::endl;
+	    //*out << "<div class=\"row\">" << std::endl;    
+	    //*out << "<div class=\"col-md-6\">" << std::endl;
+		if (m_calType == DACSCANV3){
+		  *out << "<br>" << std::endl;
+		  this->dacScanV3Selector(out);
+		  *out << "<br>" << std::endl;
+		
+		}
+		//*out << "</div>" << std::endl;
+	    *out << "</div>" << std::endl; //end row    
+	 
+	     *out << "<div class=\"col-md-6\">" << std::endl;
 	            *out << "<br>" << std::endl;
                 this->slotsAndMasksSelector(out);
 		        *out << "<br><br><br>" << std::endl;

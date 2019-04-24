@@ -137,11 +137,6 @@ void gem::calib::Calibration::applyAction(xgi::Input* in, xgi::Output* out)
         it.second = cgi[it.first]->getIntegerValue();
         CMSGEMOS_DEBUG("Calibration::applyAction : " << it.first << " = " << it.second);
     }
-    for (auto it: m_dacScanTypeParams.find(m_dacScanType)->second){
-        it.second = cgi[it.first]->getIntegerValue();
-        CMSGEMOS_DEBUG("Calibration::applyAction m_dacScanType: " << it.first << " = " << it.second);
-    }
-    
     std::stringstream t_stream;
     t_stream.clear();
     t_stream.str(std::string());
@@ -173,18 +168,39 @@ void gem::calib::Calibration::applyAction(xgi::Input* in, xgi::Output* out)
         } // end if checked for shelf
     } //end loop over shelves
     //TODO: should we check if at least one link is selected??
+
+    //DACSCAN type
+    if (m_calType==DACSCANV3){
+      std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
+      for(it=m_dacScanTypeParams.begin();it!=m_dacScanTypeParams.end();it++){
+	t_stream.clear();
+	t_stream.str(std::string());
+	t_stream << m_dacScanTypeParams_label.find(it->first)->second ;
+	bool checked = false;
+	checked = cgi.queryCheckbox(t_stream.str());
+	if (checked) {
+	  std::map<std::string, uint32_t> t_dacScan_parameters = it->second;
+	  for (auto dacScan_parameter: t_dacScan_parameters) {
+	    dacScan_parameter.second = cgi[dacScan_parameter.first]->getIntegerValue();
+	  }	  
+	}
+      }
+    }
+   //TODO: should we check the range of the parameters?
+
     out->getHTTPResponseHeader().addHeader("Content-Type", "application/json");
     if (t_errorsOccured) {
         *out << "{\"status\":1,\"alert\":\"There was an error in the parameters retrieval. Please check the XDAQ log for more information\"}";
     } else {
         *out << "{\"status\":0,\"alert\":\"Parameters successfully applied. Now you can run the scan.\"}";
     }
+   
 
-     std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
-    // std::cout<<" m_dacScanType 0 "<< m_dacScanType["CFG_CAL_DAC"].first <<std::endl;
-     for(it=m_dacScanTypeParams.begin();it!=m_dacScanTypeParams.end();it++){
-       std::cout<<" m_dacScanType 0 "<< m_dacScanTypeParams_label.find(it->first)->second <<std::endl;
-     }
+     // std::map<dacScanType_t, std::map<std::string, uint32_t> >::iterator it;
+    // // std::cout<<" m_dacScanType 0 "<< m_dacScanType["CFG_CAL_DAC"].first <<std::endl;
+    //  for(it=m_dacScanTypeParams.begin();it!=m_dacScanTypeParams.end();it++){
+    //    std::cout<<" m_dacScanType 0 "<< m_dacScanTypeParams_label.find(it->first)->second <<std::endl;
+    //  }
 }
 
 void gem::calib::Calibration::setCalType(xgi::Input* in, xgi::Output* out)
