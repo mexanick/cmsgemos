@@ -39,14 +39,6 @@ namespace bpy = boost::python;
 
 namespace gempython {}
 
-// BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(GEMHwDevice_overloads, readReg, 0, 1)
-// BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(GEMHwDevice_overloads, writeReg, 0, 1)
-
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getBoardID_overloads, getBoardID, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getBoardType_overloads, getBoardType, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFirmwareVer_overloads, getFirmwareVer, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFirmwareDate_overloads, getFirmwareDate, 0, 1)
-
 BOOST_PYTHON_MODULE(_cmsgemos_gempython) {
   /**
    * TODO how best to structure the module?
@@ -80,20 +72,15 @@ BOOST_PYTHON_MODULE(_cmsgemos_gempython) {
     // .add_static_property("name", &fget [,&fset])
 
     // functions
-    .def("getBoardID",          &gem::hw::HwGenericAMC::getBoardID,         getBoardID_overloads())
-    .def("getBoardType",        &gem::hw::HwGenericAMC::getBoardType,       getBoardType_overloads())
-    .def("getFirmwareVer",      &gem::hw::HwGenericAMC::getFirmwareVer,     getFirmwareVer_overloads())
-    .def("getFirmwareDate",     &gem::hw::HwGenericAMC::getFirmwareDate,    getFirmwareDate_overloads())
-    .def("getUserFirmware",     &gem::hw::HwGenericAMC::getUserFirmware    )
+    .def("getBoardID",          &gem::hw::HwGenericAMC::getBoardID)
+    .def("getBoardType",        &gem::hw::HwGenericAMC::getBoardType)
+    .def("getFirmwareVer",      &gem::hw::HwGenericAMC::getFirmwareVer)
+    .def("getFirmwareDate",     &gem::hw::HwGenericAMC::getFirmwareDate)
+    .def("getUserFirmware",     &gem::hw::HwGenericAMC::getUserFirmware)
     .def("getUserFirmwareDate", &gem::hw::HwGenericAMC::getUserFirmwareDate)
 
     .def("getSupportedOptoHybrids", &gem::hw::HwGenericAMC::getSupportedOptoHybrids)
-    .def("supportsTriggerLink",     &gem::hw::HwGenericAMC::supportsTriggerLink    )
-
-    // .def("getSupportedOptoHybrids", &gem::hw::HwGenericAMC::getSupportedOptoHybrids)
-    // .def("getSupportedOptoHybrids", &gem::hw::HwGenericAMC::getSupportedOptoHybrids)
-    // .def("getSupportedOptoHybrids", &gem::hw::HwGenericAMC::getSupportedOptoHybrids)
-    // .def("getSupportedOptoHybrids", &gem::hw::HwGenericAMC::getSupportedOptoHybrids)
+    .def("supportsTriggerLink",     &gem::hw::HwGenericAMC::supportsTriggerLink)
 
     // copy all by default
     // FIXME: prune the list of exposed functions
@@ -107,10 +94,6 @@ BOOST_PYTHON_MODULE(_cmsgemos_gempython) {
     .def("getCalPulseCount",                 &gem::hw::HwGenericAMC::getCalPulseCount               )
     .def("getResyncCount",                   &gem::hw::HwGenericAMC::getResyncCount                 )
     .def("getBC0Count",                      &gem::hw::HwGenericAMC::getBC0Count                    )
-    .def("resetL1ACount",                    &gem::hw::HwGenericAMC::resetL1ACount                  )
-    .def("resetCalPulseCount",               &gem::hw::HwGenericAMC::resetCalPulseCount             )
-    .def("resetResyncCount",                 &gem::hw::HwGenericAMC::resetResyncCount               )
-    .def("resetBC0Count",                    &gem::hw::HwGenericAMC::resetBC0Count                  )
     .def("readTriggerFIFO",                  &gem::hw::HwGenericAMC::readTriggerFIFO                )
     .def("flushTriggerFIFO",                 &gem::hw::HwGenericAMC::flushTriggerFIFO               )
 
